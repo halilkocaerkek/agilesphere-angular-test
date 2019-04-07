@@ -1,16 +1,33 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Store } from '@ngrx/store';
+
+import * as WeatherForecastActions from './store/actions/weather'
+import { ResultsComponent } from './components/results/results.component';
+import { IAppState } from './store/selectors/weather';
 
 @Component({
   selector: 'app-weather',
-  template: `
-  <app-search></app-search>
-  <app-results></app-results>  `
+  templateUrl: './weather.container.html'
 })
-export class WeatherContainer {
+export class WeatherContainerComponent implements OnInit, AfterViewInit {
 
-  constructor() {}
 
-  citySearch() {
-    // TO BE IMPLMENTED
+  @ViewChild(ResultsComponent) results: ResultsComponent;
+
+  constructor(private store: Store<IAppState> ) {}
+
+  ngOnInit() { }
+
+     ngAfterViewInit(): void { 
+      this.store.select('forecasts').subscribe( data => {
+        if(data) {
+          this.results.items = data.forecasts;
+        }
+     });
+  }
+
+  citySearch(name) {
+      this.store.dispatch(new WeatherForecastActions.SearchForecast( {name: name}));
   }
 }
+
